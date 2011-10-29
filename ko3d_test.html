@@ -1,0 +1,103 @@
+<html>
+<head>
+<script src="jquery.min.js"></script>
+<script src='Three.js'></script>
+<script src='ko3d.js'></script>
+
+<script>
+$(document).ready(function() {
+	$('.plot').ko3d({
+		grid: true,
+		lines: true,
+		axisColor: 0xff0000,
+		gridColor: 0x00ff00,
+		xAxisLabel: 'IPTG (mM)',
+		zAxisLabel: 'Relative Fluorescence',
+		yAxisLabel: 'Arabinose (wt%)',
+		xAxisDims	: [0, 5],
+		yAxisDims	: [0, 0.0140],
+		zAxisDims	: [0, 1]
+	}).ko3d('add', {element:$('.zdata_3d').get(0)});;
+	$('.plot2').ko3d({
+		grid: true,
+		lines: true,
+		axisColor: 0x0000ff,
+		gridColor: 0xffff00,
+		xAxisLabel: 'IPTG (mM)',
+		zAxisLabel: 'Relative Fluorescence',
+		yAxisLabel: 'Arabinose (wt%)',
+		xAxisDims	: [0, 5],
+		yAxisDims	: [0, 0.0140],
+		zAxisDims	: [0, 1]
+	}).ko3d('add', {element:$('.zdata_3d').get(0)});
+	$('.data').hide();
+});
+</script>
+<style>
+.plot {
+width:150px; 
+height:150px;
+display:inline;
+}
+.plot2 {
+width:600px; 
+height:400px;
+display:block;
+}
+</style>
+</head>
+
+<body>
+<div class='plot2'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+<div class='plot'></div>
+
+<div class='data'>
+<span class='xdata_3d'>0, 1, 2.5, 5</span>
+<span class='ydata_3d'>0.00000,   0.0014,   0.0028,   0.0042,   0.0056,   .0070,   .0140</span>
+<span class='zdata_3d'>
+   0.99353,   1.02920,   1.05770,   1.12136,
+   0.78661,   1.00142,   1.02352,   1.06377,
+   0.61233,   0.90829,   0.95385,   1.06676,
+   0.48347,   0.77363,   0.85365,   0.99591,
+   0.40302,   0.67853,   0.74660,   0.93119,
+   0.31833,   0.56058,   0.62386,   0.83851,
+   0.17311,   0.33178,   0.40330,   0.58631</span>
+<span class='stdevs_3d'>
+   0.0031579,   0.0078785,   0.0087252,   0.0491108,
+   0.0052541,   0.0065114,   0.0028587,   0.0289843,
+   0.0059555,   0.0047101,   0.0029583,   0.0241440,
+   0.0069092,   0.0036622,   0.0052977,   0.0270465,
+   0.0041919,   0.0042828,   0.0210219,   0.0054843,
+   0.0052347,   0.0067734,   0.0282990,   0.0027105,
+   0.0024241,   0.0038951,   0.0043371,   0.0029370</span></div>
+</body>
+
+</html>
