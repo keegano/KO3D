@@ -525,6 +525,7 @@ ko3d_methods = {
 					//renderer.clear();
 					data.renderer.render(data.scene, data.camera);
 				});
+				return false;
 			});
 
 		}
