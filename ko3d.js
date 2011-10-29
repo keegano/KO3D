@@ -174,7 +174,8 @@ ko3d_methods = {
 		'errWidth'	: 1,
 		'colorRamp'	: cool_color_ramp,
 		'surfOpacity'	: 1,
-		'autoRender'	: true
+		'autoRender'	: true,
+		'webGL'		: false
 		
 	};
 		if(options) {
@@ -192,10 +193,14 @@ ko3d_methods = {
 			    HEIGHT = $this.height(),
 			    ASPECT = WIDTH/HEIGHT;
 
-			$this.attr("unselectable", "on").css("MozUserSelect", "none").bind("selectstart.ui", function() {return false});
-
 			//Set up renderer, camera, and scene
-			var renderer = new THREE.CanvasRenderer();
+			if(settings.webGL)
+			{
+				var renderer = new THREE.WebGLRenderer();
+			}
+			else {
+				var renderer = new THREE.CanvasRenderer();
+			}
 			var camera = new THREE.OrthoCamera( -75, 75, 75, -75, - 2000, 1000 );
 
 			var scene = new THREE.Scene();
