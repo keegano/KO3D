@@ -9,6 +9,7 @@ $(document).ready(function() {
 	$('.plot').ko3d({
 		grid: true,
 		lines: true,
+		interactive: false,
 		axisColor: 0xff0000,
 		errColor: 0xff0000,
 		gridColor: 0x00ff00,
@@ -18,9 +19,9 @@ $(document).ready(function() {
 		yAxisLabel: 'Arabinose (wt%)',
 		xAxisDims	: [0, 5],
 		yAxisDims	: [0, 0.0140],
-		interpolate: true,
-		zAxisDims	: [0, 1]
-	}).ko3d('add', {element:$('.zdata_3d').get(0)});;
+		zAxisDims	: [0, 1],
+		element		: $('.data')
+	});
 	$('.plot2').ko3d({
 		grid: true,
 		lines: true,
@@ -35,8 +36,12 @@ $(document).ready(function() {
 		yAxisLabel: 'Arabinose (wt%)',
 		xAxisDims	: [0, 5],
 		yAxisDims	: [0, 0.0140],
-		zAxisDims	: [0, 1]
-	}).ko3d('add', {element:$('.zdata_3d').get(0)});
+		zAxisDims	: [0, 1],
+		colorRamp	: [[0,0,0],
+				   [0,0,1],
+				   [1,1,1]],
+		element		: $('.data')
+	});
 	$('.data').hide();
 });
 </script>
@@ -105,6 +110,7 @@ display:block;
    0.0041919,   0.0042828,   0.0210219,   0.0054843,
    0.0052347,   0.0067734,   0.0282990,   0.0027105,
    0.0024241,   0.0038951,   0.0043371,   0.0029370</span></div>
+
 </body>
 
 </html>

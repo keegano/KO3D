@@ -114,10 +114,10 @@ function interp2(x1, y1, x2, y2, z0, z1, z2, z3, x, y)
 
 function parseDataFromElement(element)
 {
-	var thisdataz = $(element).text().split(',');
-	var thisdatax = $(element).siblings('.xdata_3d').eq(0).text().split(',');
-	var thisdatay = $(element).siblings('.ydata_3d').eq(0).text().split(',');
-	var thisdataerr = $(element).siblings('.stdevs_3d').eq(0).text().split(',');
+	var thisdataz = $(element).children('.zdata_3d').text().split(',');
+	var thisdatax = $(element).children('.xdata_3d').eq(0).text().split(',');
+	var thisdatay = $(element).children('.ydata_3d').eq(0).text().split(',');
+	var thisdataerr = $(element).children('.stdevs_3d').eq(0).text().split(',');
 	var i;
 	for(i=0; i < thisdatax.length; ++i)
 	{
@@ -173,7 +173,8 @@ ko3d_methods = {
 		'errOpacity'	: 1,
 		'errWidth'	: 1,
 		'colorRamp'	: cool_color_ramp,
-		'surfOpacity'	: 1
+		'surfOpacity'	: 1,
+		'autoRender'	: true
 		
 	};
 		if(options) {
@@ -472,68 +473,80 @@ ko3d_methods = {
 
 			$this.append(renderer.domElement);
 
-			renderer.render(scene, camera);
 			$this.data('ko3d_data', {settings: settings, objects: objects});
 
-			$(document).bind('mouseup.ko3d', function(event){
-				$(document).unbind('mousemove.ko3d');
-			});
-			$this.bind('mousedown.ko3d', function(event){
-				var data = $(this).data('ko3d_data').objects;
-				data.lastMouseX = event.pageX;
-				data.lastMouseY = event.pageY;
-				$(document).bind('mousemove.ko3d', {plotobj:this}, function(event)
+			if(settings.element || settings.values)
+			{
+				$this.ko3d('add', options);
+			} else {
+				if(settings.autoRender)
 				{
-					var plotobj = event.data.plotobj;
-					var data = $(plotobj).data('ko3d_data').objects;
-					var settings = $(plotobj).data('ko3d_data').settings;
-					settings.cameraTheta += (data.lastMouseX - event.pageX)/70
-					settings.cameraPhi -= (data.lastMouseY - event.pageY)/70
-
-					if(settings.cameraPhi < settings.cameraMinPhi)
-					{
-					settings.cameraPhi = settings.cameraMinPhi;
-					}
-					if(settings.cameraPhi > settings.cameraMaxPhi)
-					{
-					settings.cameraPhi = settings.cameraMaxPhi;
-					}
-
-					data.camera.position.x = 250*Math.cos(settings.cameraTheta)*Math.sin(settings.cameraPhi);
-					data.camera.position.y = 250*Math.sin(settings.cameraTheta)*Math.sin(settings.cameraPhi);
-					data.camera.position.z = -250*Math.cos(settings.cameraPhi);
-
-
+					renderer.render(scene, camera);
+				}
+			}
+			if(settings.interactive) {
+				$(document).bind('mouseup.ko3d', function(event){
+					$(document).unbind('mousemove.ko3d');
+				});
+				$this.bind('mousedown.ko3d', function(event){
+					var data = $(this).data('ko3d_data').objects;
 					data.lastMouseX = event.pageX;
 					data.lastMouseY = event.pageY;
-					var zaxislabel = data.zaxislabel_obj;
-					var xaxislabel = data.xaxislabel_obj;
-					var yaxislabel = data.yaxislabel_obj;
-					var xticklabels = data.xticklabels;
-					var yticklabels = data.yticklabels;
-					zaxislabel.rotation.y = Math.PI/2 - Math.atan2((-camera.position.y),(-camera.position.x));
-					for(var i =0; i < yticklabels.length;i++)
+					$(document).bind('mousemove.ko3d', {plotobj:this}, function(event)
 					{
-						yticklabels[i].rotation.y = -zaxislabel.rotation.y;
-					}
-					for(var i =0; i < xticklabels.length;i++)
-					{
-						xticklabels[i].rotation.y = -zaxislabel.rotation.y;
-					}
+						var plotobj = event.data.plotobj;
+						var data = $(plotobj).data('ko3d_data').objects;
+						var settings = $(plotobj).data('ko3d_data').settings;
+						settings.cameraTheta += (data.lastMouseX - event.pageX)/70
+						settings.cameraPhi -= (data.lastMouseY - event.pageY)/70
 
-					$(plotobj).data('ko3d_data', {settings: settings, objects: data});
-					//renderer.clear();
-					data.renderer.render(data.scene, data.camera);
+						if(settings.cameraPhi < settings.cameraMinPhi)
+						{
+						settings.cameraPhi = settings.cameraMinPhi;
+						}
+						if(settings.cameraPhi > settings.cameraMaxPhi)
+						{
+						settings.cameraPhi = settings.cameraMaxPhi;
+						}
+
+						data.camera.position.x = 250*Math.cos(settings.cameraTheta)*Math.sin(settings.cameraPhi);
+						data.camera.position.y = 250*Math.sin(settings.cameraTheta)*Math.sin(settings.cameraPhi);
+						data.camera.position.z = -250*Math.cos(settings.cameraPhi);
+
+
+						data.lastMouseX = event.pageX;
+						data.lastMouseY = event.pageY;
+						var zaxislabel = data.zaxislabel_obj;
+						var xaxislabel = data.xaxislabel_obj;
+						var yaxislabel = data.yaxislabel_obj;
+						var xticklabels = data.xticklabels;
+						var yticklabels = data.yticklabels;
+						zaxislabel.rotation.y = Math.PI/2 - Math.atan2((-camera.position.y),(-camera.position.x));
+						for(var i =0; i < yticklabels.length;i++)
+						{
+							yticklabels[i].rotation.y = -zaxislabel.rotation.y;
+						}
+						for(var i =0; i < xticklabels.length;i++)
+						{
+							xticklabels[i].rotation.y = -zaxislabel.rotation.y;
+						}
+
+						$(plotobj).data('ko3d_data', {settings: settings, objects: data});
+						//renderer.clear();
+						data.renderer.render(data.scene, data.camera);
+					});
+					return false;
 				});
-				return false;
-			});
-
+			}
 		}
 	});
 
 		},
 	'render'	: function() {
-
+			return this.each(function() {
+				var objects = $(this).data('ko3d_data').objects;
+				objects.renderer.render(objects.scene, objects.camera);
+			});
 		},
 	'update'	: function() {
 		},
@@ -544,7 +557,20 @@ ko3d_methods = {
 		var values;
 		if(options.element)
 		{
-			values = parseDataFromElement(options.element);
+			if(options.element.length == undefined)
+			{
+				values = parseDataFromElement(options.element);
+			} else {
+				var optsdup = $.extend({}, options);
+				optsdup.autoRender = false;
+				for(var i=0; i < options.element.length; ++i)
+				{
+					optsdup.element = options.element[i];
+					$(this).ko3d('add', optsdup);
+				}
+				$(this).ko3d('render');
+				return;
+			}
 		} else if(options.values)
 		{
 			values = options.values;
@@ -691,7 +717,7 @@ ko3d_methods = {
 						color:thisfacecolor*0xffffff,
 						opacity:data.settings.surfOpacity
 					})]);
-				var newcolor = colorRamp(thisfacecolor, cool_color_ramp);
+				var newcolor = colorRamp(thisfacecolor, data.settings.colorRamp);
 				materials[i][0].color.setRGB(newcolor[0], newcolor[1], newcolor[2]);
 				surf_geom.faces[i].materials = materials[i];
 			}
@@ -701,11 +727,51 @@ ko3d_methods = {
 			
 		} else
 		{
+			var surf_geom = new THREE.PlaneGeometry(100,100,values[0].length-1, values[1].length-1);
+			for(i=0; i < values[0].length; ++i)
+			{
+				for(var j=0; j < values[1].length; ++j)
+				{
+					var thisx = values[0][i];
+					var thisy = values[1][j];
+					var thisz = values[2][j*values[0].length+i];
+					surf_geom.vertices[j*values[0].length+i].position.x = thisx/data.settings.xAxisDims[1]*100;
+					surf_geom.vertices[j*values[0].length+i].position.y = thisy/data.settings.yAxisDims[1]*100;
+					surf_geom.vertices[j*values[0].length+i].position.z = thisz/data.settings.zAxisDims[1]*100;
+				}
+			}
+
+			surf_geom.computeCentroids();
+
+			var materials = [];
+
+			for(i=0; i < surf_geom.faces.length; ++i)
+			{
+				thisfacecolor = (
+					surf_geom.vertices[surf_geom.faces[i].a].position.z+
+					surf_geom.vertices[surf_geom.faces[i].b].position.z+
+					surf_geom.vertices[surf_geom.faces[i].c].position.z+
+					surf_geom.vertices[surf_geom.faces[i].d].position.z)/4/100;
+				materials.push([new THREE.MeshBasicMaterial(
+					{
+						color:thisfacecolor*0xffffff,
+						opacity:data.settings.surfOpacity
+					})]);
+				var newcolor = colorRamp(thisfacecolor, data.settings.colorRamp);
+				materials[i][0].color.setRGB(newcolor[0], newcolor[1], newcolor[2]);
+				surf_geom.faces[i].materials = materials[i];
+			}
+			var surf_plot = new THREE.Mesh(surf_geom, data.objects.plotMat);
+			surf_plot.doubleSided = true;
+			obj.addChild(surf_plot);
 		}
 
 		data.objects.plot_obj.addChild(obj);
 		$(this).data('ko3d_data', data);
-		data.objects.renderer.render(data.objects.scene, data.objects.camera);
+		if(data.settings.autoRender)
+		{
+			data.objects.renderer.render(data.objects.scene, data.objects.camera);
+		}
 	});
 
 	
