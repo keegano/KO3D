@@ -10,12 +10,15 @@ $(document).ready(function() {
 		grid: true,
 		lines: true,
 		axisColor: 0xff0000,
+		errColor: 0xff0000,
 		gridColor: 0x00ff00,
+		surfOpacity: 0.6,
 		xAxisLabel: 'IPTG (mM)',
 		zAxisLabel: 'Relative Fluorescence',
 		yAxisLabel: 'Arabinose (wt%)',
 		xAxisDims	: [0, 5],
 		yAxisDims	: [0, 0.0140],
+		interpolate: true,
 		zAxisDims	: [0, 1]
 	}).ko3d('add', {element:$('.zdata_3d').get(0)});;
 	$('.plot2').ko3d({
@@ -23,6 +26,10 @@ $(document).ready(function() {
 		lines: true,
 		axisColor: 0x0000ff,
 		gridColor: 0xffff00,
+		surfOpacity: 0.6,
+		interpolate: true,
+		errColor: 0xff0000,
+		lineColor: 0x00ff00,
 		xAxisLabel: 'IPTG (mM)',
 		zAxisLabel: 'Relative Fluorescence',
 		yAxisLabel: 'Arabinose (wt%)',

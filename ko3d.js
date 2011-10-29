@@ -96,13 +96,7 @@ function colorRamp(value, colormap)
         highval = 1;
     }
 
-    lowcolor = RGB2HSL(colormap[lowval][0], colormap[lowval][1], colormap[lowval][2]);
-    highcolor = RGB2HSL(colormap[highval][0], colormap[highval][1], colormap[highval][2]);
-    var h = lowcolor.h*(highval - newval) + highcolor.h*(newval - lowval);
-    var s = lowcolor.s*(highval - newval) + highcolor.s*(newval - lowval);
-    var v = lowcolor.l*(highval - newval) + highcolor.l*(newval - lowval);
-
-    newcolor = HSL2RGB(h,s,v);
+    newcolor = { };
 
     newcolor.r = colormap[lowval][0]*(highval - newval) + colormap[highval][0]*(newval - lowval);
     newcolor.g = colormap[lowval][1]*(highval - newval) + colormap[highval][1]*(newval - lowval);
@@ -178,6 +172,7 @@ ko3d_methods = {
 		'errOpacity'	: 1,
 		'errWidth'	: 1,
 		'colorRamp'	: cool_color_ramp,
+		'surfOpacity'	: 1
 		
 	};
 	return this.each(function() {
@@ -224,6 +219,7 @@ ko3d_methods = {
 			objects.plot_obj = plot_obj;
 
 			//Set up materials
+			plotMat = new THREE.MeshFaceMaterial();
 			var axisMat = new THREE.LineBasicMaterial(
 			    {
 				color:settings.axisColor,
@@ -256,6 +252,7 @@ ko3d_methods = {
 			objects.lineMat = lineMat;
 			objects.errMat = errMat;
 			objects.gridMat = gridMat;
+			objects.plotMat = plotMat;
 
 
 			//Axis labels
@@ -563,8 +560,6 @@ ko3d_methods = {
 			options.handle = 'plot' + sizeOfObject(plotobjects);
 		}
 		var obj = plotobjects[options.handle] = new THREE.Object3D();
-		//data_3d.push(new THREE.PlaneGeometry(100,100,numxpoints-1, numypoints-1));
-		a = values;
 
 
 		//Generate error bars
@@ -624,97 +619,89 @@ ko3d_methods = {
 
 
 		//Generate plot surface
-/*
+
 		if(data.settings.interpolate)
 		{
 			numxpoints = data.settings.xInterpPoints;
 			numypoints = data.settings.yInterpPoints;
+			var surf_geom = new THREE.PlaneGeometry(100,100,numxpoints-1, numypoints-1);
 			for(i=0; i < numxpoints; ++i)
 			{
 				for(var j=0; j < numypoints; ++j)
 				{
-					var thisx = thisdatax[thisdatax.length-1]*i/(numxpoints-1);
-					var thisy = thisdatay[thisdatay.length-1]*j/(numypoints-1);
-					data_3d[index].vertices[j*numxpoints+i].position.x = thisx/axisdimensions[1]*100;
-					data_3d[index].vertices[j*numxpoints+i].position.y = thisy/axisdimensions[3]*100;
+					var thisx = values[0][values[0].length-1]*i/(numxpoints-1);
+					var thisy = values[1][values[1].length-1]*j/(numypoints-1);
+					surf_geom.vertices[j*numxpoints+i].position.x = thisx/data.settings.xAxisDims[1]*100;
+					surf_geom.vertices[j*numxpoints+i].position.y = thisy/data.settings.yAxisDims[1]*100;
 					//Find flanking x,y values
 					var kx = ky = 0;
-					while(thisx >= thisdatax[kx]) { 
+					while(thisx >= values[0][kx]) { 
 						kx=kx+1; 
 					}
-					while(thisy >= thisdatay[ky]) { 
+					while(thisy >= values[1][ky]) { 
 						ky=ky+1; 
 					}
-					if(kx > thisdatax.length-1)
+					if(kx > values[0].length-1)
 					{
-						kx = thisdatax.length-1;
+						kx = values[0].length-1;
 					}
-					if(ky > thisdatay.length-1)
+					if(ky > values[1].length-1)
 					{
-						ky = thisdatay.length-1;
+						ky = values[1].length-1;
 					}
 					kx--;
 					ky--;
 
 					kx = parseInt(kx);
 					ky = parseInt(ky);
-					var tli = kx+ky*thisdatax.length;
-					var tri = kx+ky*thisdatax.length+1;
-					var bli = kx+(ky+1)*thisdatax.length;
-					var bri = kx+1+(ky+1)*thisdatax.length;
-					if(!thisdataz[bli] || !thisdataz[tli] || !thisdataz[tri] || !thisdataz[bri])
+					var tli = kx+ky*values[0].length;
+					var tri = kx+ky*values[0].length+1;
+					var bli = kx+(ky+1)*values[0].length;
+					var bri = kx+1+(ky+1)*values[0].length;
+					if(!values[2][bli] || !values[2][tli] || !values[2][tri] || !values[2][bri])
 					{
 						alert("Porblem!\nkx:" + kx + "\nky:" + ky + "\nkx is a "+typeof(kx) + "\nky is a" +typeof(ky) + "\nset:" + index);
 					}
-					thisz = interp2(thisdatax[kx], 
-					thisdatay[ky], 
-					thisdatax[kx+1], 
-					thisdatay[ky+1], 
-					thisdataz[tli],
-					thisdataz[tri],
-					thisdataz[bli],
-					thisdataz[bri], thisx, thisy)
-					data_3d[index].vertices[j*numxpoints+i].position.z = thisz/axisdimensions[5]*100;
+					thisz = interp2(values[0][kx], 
+					values[1][ky], 
+					values[0][kx+1], 
+					values[1][ky+1], 
+					values[2][tli],
+					values[2][tri],
+					values[2][bli],
+					values[2][bri], thisx, thisy)
+					surf_geom.vertices[j*numxpoints+i].position.z = thisz/data.settings.zAxisDims[1]*100;
 				}
 			}
+
+			surf_geom.computeCentroids();
+
+			var materials = [];
+
+			for(i=0; i < surf_geom.faces.length; ++i)
+			{
+				thisfacecolor = (
+					surf_geom.vertices[surf_geom.faces[i].a].position.z+
+					surf_geom.vertices[surf_geom.faces[i].b].position.z+
+					surf_geom.vertices[surf_geom.faces[i].c].position.z+
+					surf_geom.vertices[surf_geom.faces[i].d].position.z)/4/100;
+				materials.push([new THREE.MeshBasicMaterial(
+					{
+						color:thisfacecolor*0xffffff,
+						opacity:data.settings.surfOpacity
+					})]);
+				var newcolor = colorRamp(thisfacecolor, cool_color_ramp);
+				materials[i][0].color.setRGB(newcolor[0], newcolor[1], newcolor[2]);
+				surf_geom.faces[i].materials = materials[i];
+			}
+			var surf_plot = new THREE.Mesh(surf_geom, data.objects.plotMat);
+			surf_plot.doubleSided = true;
+			obj.addChild(surf_plot);
+			
 		} else
 		{
-			for(var i=0; i < values[0].length; ++i)
-			{
-				for(var i=0; i < values[1].length; ++i)
-				{
-					var thisx = values[0][values[0].length-1]*i/(numxpoints-1);
-					var thisy = values[1][values[1].length-1]*j/(numypoints-1);
-					data_3d[index].vertices[j*numxpoints+i].position.x = thisx/axisdimensions[1]*100;
-					data_3d[index].vertices[j*numxpoints+i].position.y = thisy/axisdimensions[3]*100;
-				}
-			}
 		}
-		data_3d[index].computeCentroids();
 
-		materials = [];
-
-		for(i=0; i < data_3d[index].faces.length; ++i)
-		{
-			thisfacecolor = (
-				data_3d[index].vertices[data_3d[index].faces[i].a].position.z+
-				data_3d[index].vertices[data_3d[index].faces[i].b].position.z+
-				data_3d[index].vertices[data_3d[index].faces[i].c].position.z+
-				data_3d[index].vertices[data_3d[index].faces[i].d].position.z)/4/100;
-			materials.push([new THREE.MeshBasicMaterial(
-				{
-					color:thisfacecolor*0xffffff,
-					opacity:.6
-				})]);
-			if(!thisfacecolor)
-			{
-				alert("Something is terribly wrong!\na ("+data_3d[index].faces[i].a+"):"+data_3d[index].vertices[data_3d[index].faces[i].a].position.z+"\nb("+data_3d[index].faces[i].b+"):"+data_3d[index].vertices[data_3d[index].faces[i].b].position.z+"\nc("+data_3d[index].faces[i].c+"):"+data_3d[index].vertices[data_3d[index].faces[i].c].position.z+"\nd("+data_3d[index].faces[i].d+"):"+data_3d[index].vertices[data_3d[index].faces[i].a].position.z);
-			}
-			var newcolor = colorRamp(thisfacecolor, cool_color_ramp);
-			materials[i][0].color.setRGB(newcolor[0], newcolor[1], newcolor[2]);
-			data_3d[index].faces[i].materials = materials[i];
-		}
-*/
 		data.objects.plot_obj.addChild(obj);
 		$(this).data('ko3d_data', data);
 		data.objects.renderer.render(data.objects.scene, data.objects.camera);
