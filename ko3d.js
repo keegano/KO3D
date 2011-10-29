@@ -140,6 +140,7 @@ function parseDataFromElement(element)
 
 ko3d_methods = {
 	'init'		: function(options) {
+	return this.each(function() {
   	var settings = {
 		'xAxisLabel'	: 'x',
 		'yAxisLabel'	: 'y',
@@ -175,7 +176,6 @@ ko3d_methods = {
 		'surfOpacity'	: 1
 		
 	};
-	return this.each(function() {
 		if(options) {
 			$.extend(settings, options);
 		}
