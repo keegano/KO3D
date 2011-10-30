@@ -395,8 +395,8 @@ ko3d_methods = {
 			var axisgeom = new THREE.Geometry();
 			axisgeom.vertices.push(origin);
 			axisgeom.vertices.push(new THREE.Vertex(new THREE.Vector3(100,0,0)));
-			axisgeom.vertices.push(new THREE.Vertex(new THREE.Vector3(98, 1, 0)));
-			axisgeom.vertices.push(new THREE.Vertex(new THREE.Vector3(98, -1, 0)));
+			axisgeom.vertices.push(new THREE.Vertex(new THREE.Vector3(98, 0, 1)));
+			axisgeom.vertices.push(new THREE.Vertex(new THREE.Vector3(98, 0, -1)));
 			axisgeom.vertices.push(new THREE.Vertex(new THREE.Vector3(100, 0, 0)));
 
 			var xaxis = new THREE.Line(
