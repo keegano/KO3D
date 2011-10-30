@@ -6,48 +6,45 @@
 
 <script>
 $(document).ready(function() {
+
+	//Basic Usage: make all divs of class 'plot' graph the data with default settings
 	$('.plot').ko3d({
-		grid: true,
-		lines: true,
-		axisColor: 0xff0000,
-		errColor: 0xff0000,
-		gridColor: 0x00ff00,
-		surfOpacity: 0.6,
-		xAxisLabel: 'IPTG (mM)',
-		zAxisLabel: 'Relative Fluorescence',
-		yAxisLabel: 'Arabinose (wt%)',
-		xAxisDims	: [0, 5],
-		yAxisDims	: [0, 0.0140],
-		zAxisDims	: [0, 1],
 		element		: $('.data')
 	});
+	//Setting options
 	$('.plot2').ko3d({
-		grid: true,
-		lines: true,
-		axisColor: 0x0000ff,
-		gridColor: 0xffff00,
-		surfOpacity: 0.6,
-		interpolate: true,
-		errColor: 0xff0000,
-		lineColor: 0x00ff00,
-		xAxisLabel: 'IPTG (mM)',
-		zAxisLabel: 'Relative Fluorescence',
-		yAxisLabel: 'Arabinose (wt%)',
-		xAxisDims	: [0, 5],
-		yAxisDims	: [0, 0.0140],
-		zAxisDims	: [0, 1],
+		element		: $('.data'),
+		xAxisLabel	: 'IPTG (mM)',
+		zAxisLabel	: 'Relative Fluorescence',
+		yAxisLabel	: 'Arabinose (wt%)',
+		zAxisDims	: [0,1],
+		grid		: true,
+		lines		: true,
+		axisColor	: 0x0000ff,
+		axisWidth	: 3,
+		gridColor	: 0xffff00,
+		errColor	: 0xff0000,
+		lineColor	: 0x00ff00,
+		lineWidth	: 3,
+		errWidth	: 3,
+		labelColor	: '#ff00ff',
+		labelFont	: '22pt tahoma',
+		cameraMinPhi	: 4.5*Math.PI/8,
+		cameraMaxPhi	: 4.5*Math.PI/8,
+		surfOpacity	: 0.6,
+		interpolate	: true,
 		colorRamp	: [[0,0,0],
+				   [0,1,0],
 				   [0,0,1],
 				   [1,1,1]],
-		element		: $('.data')
 	});
 	$('.data').hide();
 });
 </script>
 <style>
 .plot {
-width:150px; 
-height:150px;
+width:250px; 
+height:250px;
 display:inline;
 }
 .plot2 {

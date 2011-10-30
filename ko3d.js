@@ -142,12 +142,13 @@ ko3d_methods = {
 	'init'		: function(options) {
 	return this.each(function() {
   	var settings = {
-		'xAxisLabel'	: 'x',
-		'yAxisLabel'	: 'y',
-		'zAxisLabel'	: 'z',
-		'xAxisDims'	: [0, 1],
-		'yAxisDims'	: [0, 1],
-		'zAxisDims'	: [0, 1],
+		'xAxisLabel'	: '',
+		'yAxisLabel'	: '',
+		'zAxisLabel'	: '',
+		'xAxisDims'	: [0, 0],
+		'yAxisDims'	: [0, 0],
+		'zAxisDims'	: [0, 0],
+		'autoScaleAxes'	: true,
 		'interactive'	: true,
 		'grid'		: false,
 		'lines'		: false,
@@ -175,7 +176,11 @@ ko3d_methods = {
 		'colorRamp'	: cool_color_ramp,
 		'surfOpacity'	: 1,
 		'autoRender'	: true,
-		'webGL'		: false
+		'webGL'		: false,
+		//Internal vars
+		'__xAxisDims'	: [0,0],
+		'__yAxisDims'	: [0,0],
+		'__zAxisDims'	: [0,0]
 		
 	};
 		if(options) {
@@ -204,6 +209,14 @@ ko3d_methods = {
 			var camera = new THREE.OrthoCamera( -75, 75, 75, -75, - 2000, 1000 );
 
 			var scene = new THREE.Scene();
+			if(settings.cameraPhi < settings.cameraMinPhi)
+			{
+			settings.cameraPhi = settings.cameraMinPhi;
+			}
+			if(settings.cameraPhi > settings.cameraMaxPhi)
+			{
+			settings.cameraPhi = settings.cameraMaxPhi;
+			}
 			camera.up.y = 0;
 			camera.up.z = 1;
 			camera.position.x = 250*Math.cos(settings.cameraTheta)*Math.sin(settings.cameraPhi);
@@ -223,6 +236,38 @@ ko3d_methods = {
 			plot_obj.position.y = -50;
 			scene.addChild(plot_obj);
 			objects.plot_obj = plot_obj;
+			
+			settings.__xAxisDims = settings.xAxisDims;
+			settings.__yAxisDims = settings.yAxisDims;
+			settings.__zAxisDims = settings.zAxisDims;
+			if(settings.autoScaleAxes && (options.element || options.values))
+			{
+				var values;
+				if(options.values)
+				{
+					values = options.values;
+				}else if(options.element)
+				{
+					if(options.element.length == undefined)
+					{
+						values = parseDataFromElement(options.element);
+					} else {
+						values = parseDataFromElement(options.element[0]);
+					}
+				}
+				if(settings.xAxisDims[0] == settings.xAxisDims[1])
+				{
+					settings.__xAxisDims = [Math.min.apply(null, values[0]), Math.max.apply(null, values[0])];
+				}
+				if(settings.yAxisDims[0] == settings.yAxisDims[1])
+				{
+					settings.__yAxisDims = [Math.min.apply(null, values[1]), Math.max.apply(null, values[1])];
+				}
+				if(settings.zAxisDims[0] == settings.zAxisDims[1])
+				{
+					settings.__zAxisDims = [Math.min.apply(null, values[2]), Math.max.apply(null, values[2])];
+				}
+			}
 
 			//Set up materials
 			plotMat = new THREE.MeshFaceMaterial();
@@ -276,10 +321,10 @@ ko3d_methods = {
 			});
 			xm.map.needsUpdate = true;
 
-			var xaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400, 40, 2, 2), xm);
+			var xaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400, 40*ASPECT, 2, 2), xm);
 			xaxislabel.position.x = -50;
-			xaxislabel.position.y = 0;
-			xaxislabel.position.z = -48;
+			xaxislabel.position.y = 50;
+			xaxislabel.position.z = -46;
 			xaxislabel.scale.x = 0.2;
 			xaxislabel.scale.y = -0.2;
 			xaxislabel.rotation.x = -Math.PI/2;
@@ -300,10 +345,10 @@ ko3d_methods = {
 			});
 			xm.map.needsUpdate = true;
 
-			var yaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400, 40, 2, 2), xm);
-			yaxislabel.position.x = 0;
+			var yaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400, 40*ASPECT, 2, 2), xm);
+			yaxislabel.position.x = 50;
 			yaxislabel.position.y = -50;
-			yaxislabel.position.z = -48;
+			yaxislabel.position.z = -46;
 			yaxislabel.scale.x = 0.2;
 			yaxislabel.scale.y = -0.2;
 			yaxislabel.rotation.x = -Math.PI/2;
@@ -323,7 +368,7 @@ ko3d_methods = {
 			});
 			xm.map.needsUpdate = true;
 			var zaxislabelOrigin = new THREE.Object3D();
-			var zaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400, 40, 2, 2), xm);
+			var zaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400, 40*ASPECT, 2, 2), xm);
 			zaxislabelOrigin.position.x = -50;
 			zaxislabelOrigin.position.y = -50;
 			zaxislabel.position.y = 15;
@@ -432,7 +477,7 @@ ko3d_methods = {
 			    xc.fillStyle = settings.labelColor;
 			    xc.font = settings.labelFont;
 			    xc.textBaseline = "top";
-			    xc.fillText(i/5*settings.xAxisDims[1], 10, 0);
+			    xc.fillText(i/5*settings.__xAxisDims[1], 10, 0);
 
 			    var xm = new THREE.MeshBasicMaterial({
 			    map: new THREE.Texture(x)
@@ -454,7 +499,7 @@ ko3d_methods = {
 			    xc.fillStyle = settings.labelColor;
 			    xc.font = settings.labelFont;
 			    xc.textBaseline = "top";
-			    xc.fillText((i/5*settings.yAxisDims[1]).toFixed(3), 10, 0);
+			    xc.fillText((i/5*settings.__yAxisDims[1]).toFixed(3), 10, 0);
 
 			    var xm = new THREE.MeshBasicMaterial({
 			    map: new THREE.Texture(x)
@@ -600,14 +645,14 @@ ko3d_methods = {
 		{
 			var errbargeom = new THREE.Geometry();
 			errbargeom.vertices.push(new THREE.Vertex(new THREE.Vector3(
-				values[0][i%values[0].length]/data.settings.xAxisDims[1]*100,
-				values[1][Math.floor(i/values[0].length)]/data.settings.yAxisDims[1]*100,
-				values[2][i]/data.settings.zAxisDims[1]*100-values[3][i]/data.settings.zAxisDims[1]*100
+				values[0][i%values[0].length]/data.settings.__xAxisDims[1]*100,
+				values[1][Math.floor(i/values[0].length)]/data.settings.__yAxisDims[1]*100,
+				values[2][i]/data.settings.__zAxisDims[1]*100-values[3][i]/data.settings.__zAxisDims[1]*100
 			)));
 			errbargeom.vertices.push(new THREE.Vertex(new THREE.Vector3(
-				values[0][i%values[0].length]/data.settings.xAxisDims[1]*100,
-				values[1][Math.floor(i/values[0].length)]/data.settings.yAxisDims[1]*100,
-				values[2][i]/data.settings.zAxisDims[1]*100+values[3][i]/data.settings.zAxisDims[1]*100
+				values[0][i%values[0].length]/data.settings.__xAxisDims[1]*100,
+				values[1][Math.floor(i/values[0].length)]/data.settings.__yAxisDims[1]*100,
+				values[2][i]/data.settings.__zAxisDims[1]*100+values[3][i]/data.settings.__zAxisDims[1]*100
 			)));
 			var errbar = new THREE.Line(errbargeom, data.objects.errMat);
 			obj.addChild(errbar);
@@ -621,14 +666,14 @@ ko3d_methods = {
 			{
 				var linegeom = new THREE.Geometry();
 				linegeom.vertices.push(new THREE.Vertex(new THREE.Vector3(
-					values[0][i%values[0].length]/data.settings.xAxisDims[1]*100,
-					values[1][Math.floor(i/values[0].length)]/data.settings.yAxisDims[1]*100,
-					values[2][i]/data.settings.zAxisDims[1]*100
+					values[0][i%values[0].length]/data.settings.__xAxisDims[1]*100,
+					values[1][Math.floor(i/values[0].length)]/data.settings.__yAxisDims[1]*100,
+					values[2][i]/data.settings.__zAxisDims[1]*100
 				)));
 				linegeom.vertices.push(new THREE.Vertex(new THREE.Vector3(
-					values[0][(i+values[0].length)%values[0].length]/data.settings.xAxisDims[1]*100,
-					values[1][Math.floor((i+values[0].length)/values[0].length)]/data.settings.yAxisDims[1]*100,
-					values[2][i+values[0].length]/data.settings.zAxisDims[1]*100
+					values[0][(i+values[0].length)%values[0].length]/data.settings.__xAxisDims[1]*100,
+					values[1][Math.floor((i+values[0].length)/values[0].length)]/data.settings.__yAxisDims[1]*100,
+					values[2][i+values[0].length]/data.settings.__zAxisDims[1]*100
 				)));
 				obj.addChild(new THREE.Line(linegeom, data.objects.lineMat));
 			}
@@ -636,14 +681,14 @@ ko3d_methods = {
 			{
 				var linegeom = new THREE.Geometry();
 				linegeom.vertices.push(new THREE.Vertex(new THREE.Vector3(
-					values[0][i%(values[0].length-1)]/data.settings.xAxisDims[1]*100,
-					values[1][Math.floor(i/(values[0].length-1))]/data.settings.yAxisDims[1]*100,
-					values[2][Math.floor(i/(values[0].length-1))+i]/data.settings.zAxisDims[1]*100
+					values[0][i%(values[0].length-1)]/data.settings.__xAxisDims[1]*100,
+					values[1][Math.floor(i/(values[0].length-1))]/data.settings.__yAxisDims[1]*100,
+					values[2][Math.floor(i/(values[0].length-1))+i]/data.settings.__zAxisDims[1]*100
 				)));
 				linegeom.vertices.push(new THREE.Vertex(new THREE.Vector3(
-					values[0][i%(values[0].length-1)+1]/data.settings.xAxisDims[1]*100,
-					values[1][Math.floor(i/(values[0].length-1))]/data.settings.yAxisDims[1]*100,
-					values[2][Math.floor(i/(values[0].length-1))+i+1]/data.settings.zAxisDims[1]*100
+					values[0][i%(values[0].length-1)+1]/data.settings.__xAxisDims[1]*100,
+					values[1][Math.floor(i/(values[0].length-1))]/data.settings.__yAxisDims[1]*100,
+					values[2][Math.floor(i/(values[0].length-1))+i+1]/data.settings.__zAxisDims[1]*100
 				)));
 				obj.addChild(new THREE.Line(linegeom, data.objects.lineMat));
 			}
@@ -663,8 +708,8 @@ ko3d_methods = {
 				{
 					var thisx = values[0][values[0].length-1]*i/(numxpoints-1);
 					var thisy = values[1][values[1].length-1]*j/(numypoints-1);
-					surf_geom.vertices[j*numxpoints+i].position.x = thisx/data.settings.xAxisDims[1]*100;
-					surf_geom.vertices[j*numxpoints+i].position.y = thisy/data.settings.yAxisDims[1]*100;
+					surf_geom.vertices[j*numxpoints+i].position.x = thisx/data.settings.__xAxisDims[1]*100;
+					surf_geom.vertices[j*numxpoints+i].position.y = thisy/data.settings.__yAxisDims[1]*100;
 					//Find flanking x,y values
 					var kx = ky = 0;
 					while(thisx >= values[0][kx]) { 
@@ -702,7 +747,7 @@ ko3d_methods = {
 					values[2][tri],
 					values[2][bli],
 					values[2][bri], thisx, thisy)
-					surf_geom.vertices[j*numxpoints+i].position.z = thisz/data.settings.zAxisDims[1]*100;
+					surf_geom.vertices[j*numxpoints+i].position.z = thisz/data.settings.__zAxisDims[1]*100;
 				}
 			}
 
@@ -740,9 +785,9 @@ ko3d_methods = {
 					var thisx = values[0][i];
 					var thisy = values[1][j];
 					var thisz = values[2][j*values[0].length+i];
-					surf_geom.vertices[j*values[0].length+i].position.x = thisx/data.settings.xAxisDims[1]*100;
-					surf_geom.vertices[j*values[0].length+i].position.y = thisy/data.settings.yAxisDims[1]*100;
-					surf_geom.vertices[j*values[0].length+i].position.z = thisz/data.settings.zAxisDims[1]*100;
+					surf_geom.vertices[j*values[0].length+i].position.x = thisx/data.settings.__xAxisDims[1]*100;
+					surf_geom.vertices[j*values[0].length+i].position.y = thisy/data.settings.__yAxisDims[1]*100;
+					surf_geom.vertices[j*values[0].length+i].position.z = thisz/data.settings.__zAxisDims[1]*100;
 				}
 			}
 
