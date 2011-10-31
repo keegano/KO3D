@@ -204,7 +204,7 @@ ko3d_methods = {
 				var renderer = new THREE.WebGLRenderer();
 			}
 			else {
-				var renderer = new THREE.CanvasRenderer();
+				var renderer = new THREE.CanvasRenderer({});
 			}
 			var camera = new THREE.OrthoCamera( -75, 75, 75, -75, - 2000, 1000 );
 
@@ -368,11 +368,11 @@ ko3d_methods = {
 			});
 			xm.map.needsUpdate = true;
 			var zaxislabelOrigin = new THREE.Object3D();
-			var zaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400, 40*ASPECT, 2, 2), xm);
+			var zaxislabel = new THREE.Mesh(new THREE.PlaneGeometry(400*ASPECT, 40, 2, 2), xm);
 			zaxislabelOrigin.position.x = -50;
 			zaxislabelOrigin.position.y = -50;
 			zaxislabel.position.y = 15;
-			zaxislabelOrigin.position.z = 0;
+			zaxislabelOrigin.position.z = 20;
 			zaxislabelOrigin.rotation.x = -Math.PI/2;
 			zaxislabelOrigin.rotation.y = -Math.PI/2;
 			zaxislabelOrigin.rotation.z = -Math.PI/2;
@@ -519,6 +519,15 @@ ko3d_methods = {
 			}
 			objects.xticklabels = xticklabels;
 			objects.yticklabels = yticklabels;
+			zaxislabelOrigin.rotation.y = Math.PI/2 - Math.atan2((-camera.position.y),(-camera.position.x));
+			for(var i =0; i < yticklabels.length;i++)
+			{
+				yticklabels[i].rotation.y = -zaxislabelOrigin.rotation.y;
+			}
+			for(var i =0; i < xticklabels.length;i++)
+			{
+				xticklabels[i].rotation.y = -zaxislabelOrigin.rotation.y;
+			}
 			objects.plotobjects = {};
 
 			$this.append(renderer.domElement);
