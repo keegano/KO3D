@@ -55,7 +55,7 @@ add loaders for CSV and JSON files.
 
 To create a plot, create a div element with a preset width and height. This
 is important; failure to set these values results in a plot with dimensions
-0x0, which is very, very hard to see. Then, use a simply jquery call to set
+0x0, which is very, very hard to see. Then, use a simple jquery call to set
 up the plot after the document is loaded. Here is a complete example:
 
     <html>
