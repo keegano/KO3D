@@ -744,10 +744,7 @@ ko3d_methods = {
 					var tri = kx+ky*values[0].length+1;
 					var bli = kx+(ky+1)*values[0].length;
 					var bri = kx+1+(ky+1)*values[0].length;
-					if(!values[2][bli] || !values[2][tli] || !values[2][tri] || !values[2][bri])
-					{
-						alert("Porblem!\nkx:" + kx + "\nky:" + ky + "\nkx is a "+typeof(kx) + "\nky is a" +typeof(ky) + "\nset:" + index);
-					}
+
 					thisz = interp2(values[0][kx], 
 					values[1][ky], 
 					values[0][kx+1], 
