@@ -56,7 +56,7 @@ add loaders for CSV and JSON files.
 To create a plot, create a div element with a preset width and height. This
 is important; failure to set these values results in a plot with dimensions
 0x0, which is very, very hard to see. Then, use a simply jquery call to set
-up the plot after the document is loaded. Here is a simple example:
+up the plot after the document is loaded. Here is a complete example:
 
     <html>
     <head>
@@ -138,8 +138,4 @@ is a list of each parameter and its default value.
 	'colorRamp'	: cool_color_ramp,
 	'surfOpacity'	: 1,
 	'autoRender'	: true,
-	'webGL'		: false,
-	//Internal vars
-	'__xAxisDims'	: [0,0],
-	'__yAxisDims'	: [0,0],
-	'__zAxisDims'	: [0,0]
+	'webGL'		: false
