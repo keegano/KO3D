@@ -9,7 +9,8 @@ $(document).ready(function() {
 
 	//Basic Usage: make all divs of class 'plot' graph the data with default settings
 	$('.plot').ko3d({
-		element		: $('.data')
+		element		: $('.data'),
+                interpolate     : true
 	});
 	//Setting options
 	$('.plot2').ko3d({
